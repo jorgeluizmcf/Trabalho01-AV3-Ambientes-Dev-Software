@@ -1,0 +1,23 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "extends": "airbnb-base",
+  "parserOptions": {
+    "ecmaVersion": "latest"
+  },
+  "rules": {
+    // Você pode desligar regras aqui se precisar
+    // "no-console": "off"
+  },
+  "globals": {
+    "bootstrap": "readonly",
+    "f": "readonly",
+    "resetFilters": "readonly",
+    "p1": "readonly",
+    "p2": "readonly",
+    "x": "readonly",
+    "showDetails": "readonly"
+  }
+}

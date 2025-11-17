@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+
 const app = express();
 
 const p = 3000;
@@ -7,31 +8,16 @@ const p = 3000;
 app.use(express.static(path.join(__dirname, 'public')));
 
 function doStuff(req, res) {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));    
-    console.log('x');
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 }
 
 app.get('/', doStuff);
 
 app.listen(p, () => {
-    var msg = 'Server';
-    msg = msg + ' ';
-    msg = msg + 'running';
-    msg = msg + ' ';
-    msg = msg + 'on';
-    msg = msg + ' ';
-    msg = msg + 'port';
-    msg = msg + ' ';
-    msg = msg + p;
-    console.log(msg);
-    
-    var unused = 'this is never used';
-    var x = 10;
-    var y = 20;
+  const msg = `Server running on port ${p}`;
+  // CORREÇÃO 'no-console':
+  // Desabilitamos a regra do ESLint apenas para esta linha,
+  // pois este console.log é útil para sabermos que o server subiu.
+  // eslint-disable-next-line no-console
+  console.log(msg);
 });
-
-function f1() {
-    return true;
-}
-
-var globalVar = 'I am global';

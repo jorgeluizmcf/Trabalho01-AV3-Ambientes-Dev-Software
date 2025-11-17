@@ -34,3 +34,12 @@ As seguintes melhorias foram implementadas:
 * CSS3
 * JavaScript (ES6+)
 * GitHub Actions (para CI/CD)
+
+---
+
+## 🤖 Prompts Utilizados
+
+Para o cumprimento desta atividade, foram utilizados os seguintes Prompts:
+
+* (jorgeluizmcf) https://gemini.google.com/share/b511033b0b8a
+* (jorgeluizmcf) https://gemini.google.com/share/a1ab81557fb3

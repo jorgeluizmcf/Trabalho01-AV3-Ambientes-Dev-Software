@@ -33,6 +33,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24' # Ou a versão que você usa
+      - name: Install Dependencies
+        run: npm install # Ou 'npm ci' se você tiver o package-lock.json
+      - name: Run ESLint
+        run: npm run lint
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
