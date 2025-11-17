@@ -1,5 +1,6 @@
 // CORREÇÃO: Informa ao ESLint que 'bootstrap' é uma variável global
 // vinda de outro script (corrige 'no-undef').
+/* exported showDetails */
 
 let a = [];
 let b = [];
@@ -229,7 +230,8 @@ x();
 // CORREÇÃO (camelcase / no-unused-vars):
 // 1. Renomeada de 'Minhe_nha' para 'showDetails' (camelCase).
 // 2. O HTML já chamava 'showDetails', então isso corrige o bug.
-async function showDetails(id) {
+/* exported showDetails */
+window.showDetails = async function showDetails(id) {
   try {
     const xpto = await fetch(`${API}/${id}`);
     const p = await xpto.json();
@@ -292,10 +294,10 @@ async function showDetails(id) {
   } catch (error) {
     // CORREÇÃO (no-console / no-alert): Removidos.
   }
-}
+};
 
 // usando função para cumprir eslint
-showDetails(1);
+// showDetails(1);
 
 // CORREÇÃO (no-unused-vars): Removida a função 'mor' e a const 'gmord'
 // que não eram usadas em lugar nenhum.

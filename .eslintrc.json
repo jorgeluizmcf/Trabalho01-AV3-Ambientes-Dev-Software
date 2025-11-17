@@ -1,15 +1,21 @@
 {
+  "root": true,
   "env": {
     "browser": true,
-    "es2021": true
+    "es2021": true,
+    "node": true
   },
   "extends": "airbnb-base",
   "parserOptions": {
-    "ecmaVersion": "latest"
+    "ecmaVersion": "latest",
+    "sourceType": "module"
   },
   "rules": {
-    // Você pode desligar regras aqui se precisar
-    // "no-console": "off"
+    "no-console": "off",
+    "no-alert": "off",
+    "no-unused-vars": ["warn", { "args": "none", "varsIgnorePattern": "^_" }],
+    "no-plusplus": "off",
+    "camelcase": "off"
   },
   "globals": {
     "bootstrap": "readonly",
