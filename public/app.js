@@ -6,16 +6,15 @@
 const CONFIG = {
      pageSize: 20 , // Limite de pokémons por página.
      maxTypePokemons: 100 , // Limite de pokémons no filtro por tipo.
-     maxStat: 255 , // maximo possivel de stats.
+     maxStat: 255 , // Maximo possivel de stats.
      loadingSkeletons: 20 // Quantidade de skeletons exibidos.
 };
 
 let a = [];
 let b = [];
 let c = 1; // 1 = pagina inicial.
-// linha onde ficava a variavel d.
-let e = ''; // 'e' é o filtro de busca
-let f1 = ''; // 'f1' é o filtro de tipo
+let e = ''; // 'e' é o filtro de busca.
+let f1 = ''; // 'f1' é o filtro de tipo.
 
 // CORREÇÃO: Variável 'g' removida (corrigia 'no-unused-vars')
 
@@ -81,8 +80,8 @@ async function l() {
   document.getElementById('pokemonGrid').style.display = 'none';
 
   try {
-    const off = (c - 1) * pageSize;
-    const ur = `${API}?limit=${pageSize}&offset=${off}`;
+    const off = (c - 1) * CONFIG.pageSize;
+    const ur = `${API}?limit=${CONFIG.pageSize}&offset=${off}`;
     // CORREÇÃO (no-var): Trocado 'var' por 'const'
     const response = await fetch(ur);
     const dt = await response.json();
@@ -123,7 +122,8 @@ async function lbt() {
     const dt = await response.json();
 
     const pr = [];
-    const li = dt.pokemon.length > maxTypePokemons ? maxTypePokemons : dt.pokemon.length; // troca do numero 100 pelo nome da constante.
+    const li = dt.pokemon.length > CONFIG.maxTypePokemons ? CONFIG.maxTypePokemons : dt.pokemon.length; 
+    // troca do numero 100 pelo nome da constante.
     // CORREÇÃO (no-var / no-plusplus): Trocado 'var i' por 'let i' e 'i++' por 'i += 1'
     for (let i = 0; i < li; i += 1) {
       pr.push(fetch(dt.pokemon[i].pokemon.url));
@@ -146,7 +146,7 @@ async function lbt() {
 async function initializePage() {
   document.getElementById('loading').innerHTML = '';
   // CORREÇÃO (no-var / no-plusplus): Trocado 'var i' por 'let i' e 'i++' por 'i += 1'
-  for (let i = 0; i < loadingSkeletons; i += 1) { // substituicao do valor 20 pelo nome da constante.
+  for (let i = 0; i < CONFIG.loadingSkeletons; i += 1) { // substituicao do valor 20 pelo nome da constante.
     document.getElementById('loading').innerHTML += '<div class="col-md-3"><div class="skeleton"></div></div>';
   }
 
@@ -256,7 +256,8 @@ window.showDetails = async function showDetails(id) {
       }
     }
 
-    document.getElementById('modalTitle').textContent = `#${p.id} ${p.name.charAt(0).toUpperCase()}${p.name.slice(1)}`;
+    document.getElementById('modalTitle').textContent = `#${p.id} ${p.name.charAt(0).toUpperCase()}
+    ${p.name.slice(1)}`;
 
     let ph = '<div class="row"><div class="col-md-6">';
     ph += '<div class="sprite-container">';
@@ -289,7 +290,8 @@ window.showDetails = async function showDetails(id) {
     // CORREÇÃO (no-var / no-plusplus): Trocado 'var i' por 'let i' e 'i++' por 'i += 1'
     for (let i = 0; i < p.stats.length; i += 1) {
       const stat = p.stats[i];
-      const percentage = (stat.base_stat / maxStat) * 100; // substituicao do 255 pelo nome da constante.
+      const percentage = (stat.base_stat / CONFIG.maxStat) * 100; 
+      // substituicao do 255 pelo nome da constante.
       ph += `<div><small>${stat.stat.name}: ${stat.base_stat}</small>`;
       ph += `<div class="stat-bar"><div class="stat-fill" style="width: ${percentage}%"></div></div></div>`;
     }
