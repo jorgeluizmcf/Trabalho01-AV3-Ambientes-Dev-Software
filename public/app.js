@@ -2,10 +2,18 @@
 // vinda de outro script (corrige 'no-undef').
 /* exported showDetails */
 
+// Objeto de constantes nomeadas.
+const CONFIG = {
+     pageSize: 20 , // Limite de pokémons por página.
+     maxTypePokemons: 100 , // Limite de pokémons no filtro por tipo.
+     maxStat: 255 , // maximo possivel de stats.
+     loadingSkeletons: 20 // Quantidade de skeletons exibidos.
+};
+
 let a = [];
 let b = [];
-let c = 1;
-const d = 20; // 'd' é o limite de pokémons por página
+let c = 1; // 1 = pagina inicial.
+// linha onde ficava a variavel d.
 let e = ''; // 'e' é o filtro de busca
 let f1 = ''; // 'f1' é o filtro de tipo
 
@@ -73,8 +81,8 @@ async function l() {
   document.getElementById('pokemonGrid').style.display = 'none';
 
   try {
-    const off = (c - 1) * d;
-    const ur = `${API}?limit=${d}&offset=${off}`;
+    const off = (c - 1) * pageSize;
+    const ur = `${API}?limit=${pageSize}&offset=${off}`;
     // CORREÇÃO (no-var): Trocado 'var' por 'const'
     const response = await fetch(ur);
     const dt = await response.json();
@@ -115,7 +123,7 @@ async function lbt() {
     const dt = await response.json();
 
     const pr = [];
-    const li = dt.pokemon.length > 100 ? 100 : dt.pokemon.length;
+    const li = dt.pokemon.length > maxTypePokemons ? maxTypePokemons : dt.pokemon.length; // troca do numero 100 pelo nome da constante.
     // CORREÇÃO (no-var / no-plusplus): Trocado 'var i' por 'let i' e 'i++' por 'i += 1'
     for (let i = 0; i < li; i += 1) {
       pr.push(fetch(dt.pokemon[i].pokemon.url));
@@ -138,7 +146,7 @@ async function lbt() {
 async function initializePage() {
   document.getElementById('loading').innerHTML = '';
   // CORREÇÃO (no-var / no-plusplus): Trocado 'var i' por 'let i' e 'i++' por 'i += 1'
-  for (let i = 0; i < 20; i += 1) {
+  for (let i = 0; i < loadingSkeletons; i += 1) { // substituicao do valor 20 pelo nome da constante.
     document.getElementById('loading').innerHTML += '<div class="col-md-3"><div class="skeleton"></div></div>';
   }
 
@@ -281,7 +289,7 @@ window.showDetails = async function showDetails(id) {
     // CORREÇÃO (no-var / no-plusplus): Trocado 'var i' por 'let i' e 'i++' por 'i += 1'
     for (let i = 0; i < p.stats.length; i += 1) {
       const stat = p.stats[i];
-      const percentage = (stat.base_stat / 255) * 100;
+      const percentage = (stat.base_stat / maxStat) * 100; // substituicao do 255 pelo nome da constante.
       ph += `<div><small>${stat.stat.name}: ${stat.base_stat}</small>`;
       ph += `<div class="stat-bar"><div class="stat-fill" style="width: ${percentage}%"></div></div></div>`;
     }
