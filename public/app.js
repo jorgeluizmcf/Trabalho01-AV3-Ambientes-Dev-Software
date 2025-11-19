@@ -4,10 +4,10 @@
 
 // Objeto de constantes nomeadas.
 const CONFIG = {
-     pageSize: 20 , // Limite de pokémons por página.
-     maxTypePokemons: 100 , // Limite de pokémons no filtro por tipo.
-     maxStat: 255 , // Maximo possivel de stats.
-     loadingSkeletons: 20 // Quantidade de skeletons exibidos.
+  pageSize: 20, // Limite de pokémons por página.
+  maxTypePokemons: 100, // Limite de pokémons no filtro por tipo.
+  maxStat: 255, // Maximo possivel de stats.
+  loadingSkeletons: 20, // Quantidade de skeletons exibidos.
 };
 
 let a = [];
@@ -33,8 +33,10 @@ function UNIFOR() {
 
   let fil = b;
   if (e !== '') {
-    fil = fil.filter((p) => p.name.toLowerCase().includes(e.toLowerCase())
-                      || p.id.toString().includes(e));
+    fil = fil.filter(
+      (p) => p.name.toLowerCase().includes(e.toLowerCase())
+        || p.id.toString().includes(e),
+    );
   }
 
   // CORREÇÃO (no-plusplus): Trocado 'i++' por 'i += 1'
@@ -47,7 +49,9 @@ function UNIFOR() {
     let html = `
       <div class="c" onclick="showDetails(${p.id})">
         <img src="${p.sprites.front_default}" class="i" alt="${p.name}">
-        <h5 class="text-center">#${p.id} ${p.name.charAt(0).toUpperCase()}${p.name.slice(1)}</h5>
+        <h5 class="text-center">#${p.id} ${p.name
+  .charAt(0)
+  .toUpperCase()}${p.name.slice(1)}</h5>
         <div class="text-center">
     `;
 
@@ -66,7 +70,9 @@ function UNIFOR() {
   document.getElementById('pokemonGrid').style.display = 'flex';
 
   if (f1 !== '') {
-    document.getElementById('pageInfo').textContent = `Mostrando ${fil.length} pokémons`;
+    document.getElementById(
+      'pageInfo',
+    ).textContent = `Mostrando ${fil.length} pokémons`;
   } else {
     document.getElementById('pageInfo').textContent = `Página ${c}`;
   }
@@ -122,7 +128,9 @@ async function lbt() {
     const dt = await response.json();
 
     const pr = [];
-    const li = dt.pokemon.length > CONFIG.maxTypePokemons ? CONFIG.maxTypePokemons : dt.pokemon.length; 
+    const li = dt.pokemon.length > CONFIG.maxTypePokemons
+      ? CONFIG.maxTypePokemons
+      : dt.pokemon.length;
     // troca do numero 100 pelo nome da constante.
     // CORREÇÃO (no-var / no-plusplus): Trocado 'var i' por 'let i' e 'i++' por 'i += 1'
     for (let i = 0; i < li; i += 1) {
@@ -146,8 +154,10 @@ async function lbt() {
 async function initializePage() {
   document.getElementById('loading').innerHTML = '';
   // CORREÇÃO (no-var / no-plusplus): Trocado 'var i' por 'let i' e 'i++' por 'i += 1'
-  for (let i = 0; i < CONFIG.loadingSkeletons; i += 1) { // substituicao do valor 20 pelo nome da constante.
-    document.getElementById('loading').innerHTML += '<div class="col-md-3"><div class="skeleton"></div></div>';
+  for (let i = 0; i < CONFIG.loadingSkeletons; i += 1) {
+    // substituicao do valor 20 pelo nome da constante.
+    document.getElementById('loading').innerHTML
+      += '<div class="col-md-3"><div class="skeleton"></div></div>';
   }
 
   try {
@@ -158,7 +168,8 @@ async function initializePage() {
     for (let i = 0; i < dt.results.length; i += 1) {
       const opt = document.createElement('option');
       opt.value = dt.results[i].name;
-      opt.textContent = dt.results[i].name.charAt(0).toUpperCase() + dt.results[i].name.slice(1);
+      opt.textContent = dt.results[i].name.charAt(0).toUpperCase()
+        + dt.results[i].name.slice(1);
       sel.appendChild(opt);
     }
   } catch (err) {
@@ -210,9 +221,6 @@ function p1() {
   }
 }
 
-// usando função para cumprir eslint
-p1();
-
 // CORREÇÃO (no-unused-vars): Esta função é chamada pelo HTML (onclick)
 function p2() {
   // CORREÇÃO (no-plusplus): Trocado 'c++' por 'c += 1'
@@ -226,6 +234,9 @@ function p2() {
 
 // usando função para cumprir eslint
 p2();
+
+// usando função para cumprir eslint
+p1();
 
 // CORREÇÃO (no-unused-vars): Esta função é chamada pelo HTML (onclick)
 function x() {
@@ -256,7 +267,9 @@ window.showDetails = async function showDetails(id) {
       }
     }
 
-    document.getElementById('modalTitle').textContent = `#${p.id} ${p.name.charAt(0).toUpperCase()}
+    document.getElementById('modalTitle').textContent = `#${p.id} ${p.name
+      .charAt(0)
+      .toUpperCase()}
     ${p.name.slice(1)}`;
 
     let ph = '<div class="row"><div class="col-md-6">';
@@ -290,7 +303,7 @@ window.showDetails = async function showDetails(id) {
     // CORREÇÃO (no-var / no-plusplus): Trocado 'var i' por 'let i' e 'i++' por 'i += 1'
     for (let i = 0; i < p.stats.length; i += 1) {
       const stat = p.stats[i];
-      const percentage = (stat.base_stat / CONFIG.maxStat) * 100; 
+      const percentage = (stat.base_stat / CONFIG.maxStat) * 100;
       // substituicao do 255 pelo nome da constante.
       ph += `<div><small>${stat.stat.name}: ${stat.base_stat}</small>`;
       ph += `<div class="stat-bar"><div class="stat-fill" style="width: ${percentage}%"></div></div></div>`;
