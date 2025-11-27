@@ -43,3 +43,4 @@ Para o cumprimento desta atividade, foram utilizados os seguintes Prompts:
 
 * (jorgeluizmcf) https://gemini.google.com/share/b511033b0b8a
 * (jorgeluizmcf) https://gemini.google.com/share/a1ab81557fb3
+* (miqueias) https://chatgpt.com/share/691e3bbc-29ec-8012-bee2-36c5fa9f06b4
