@@ -1,8 +1,7 @@
-// CORREÇÃO: Informa ao ESLint que 'bootstrap' é uma variável global
-// vinda de outro script (corrige 'no-undef').
+// Informa ao ESLint que 'bootstrap' é uma variável global
 /* exported showDetails */
 
-// Objeto de constantes nomeadas.
+// Objeto de constantes nomeadas para configurações da aplicação.
 const CONFIG = {
   pageSize: 20, // Limite de pokémons por página.
   maxTypePokemons: 100, // Limite de pokémons no filtro por tipo.
@@ -10,322 +9,295 @@ const CONFIG = {
   loadingSkeletons: 20, // Quantidade de skeletons exibidos.
 };
 
-let a = [];
-let b = [];
-let c = 1; // 1 = pagina inicial.
-let e = ''; // 'e' é o filtro de busca.
-let f1 = ''; // 'f1' é o filtro de tipo.
+// Variáveis de estado global
+let pokemonCache = []; // Cache de todos os Pokémons carregados (seja por página ou tipo).
+let currentPokemonList = []; // Lista de Pokémons atualmente exibida (pode ser filtrada).
+let currentPage = 1; // Número da página atual.
+let searchFilter = ''; // O valor do filtro de busca por nome/ID.
+let typeFilter = ''; // O valor do filtro por tipo.
 
-// CORREÇÃO: Variável 'g' removida (corrigia 'no-unused-vars')
+const POKEMON_API_URL = 'https://pokeapi.co/api/v2/pokemon';
+const TYPE_API_URL = 'https://pokeapi.co/api/v2/type';
 
-const API = 'https://pokeapi.co/api/v2/pokemon';
-const API2 = 'https://pokeapi.co/api/v2/type';
+// Função: Renderiza a lista de Pokémons na grade, aplicando o filtro de busca.
+function renderPokemonGrid() {
+  const gridContainer = document.getElementById('pokemonGrid');
+  gridContainer.innerHTML = '';
 
-// CORREÇÃO (no-use-before-define):
-// As funções foram reordenadas. 'UNIFOR' é usada por 'l' e 'lbt',
-// então ela deve vir primeiro.
-
-function UNIFOR() {
-  // CORREÇÃO (no-shadow): 'g' aqui é 'const' e local,
-  // não conflita com o global (que removemos).
-  const grid = document.getElementById('pokemonGrid');
-  grid.innerHTML = '';
-
-  let fil = b;
-  if (e !== '') {
-    fil = fil.filter(
-      (p) => p.name.toLowerCase().includes(e.toLowerCase())
-        || p.id.toString().includes(e),
+  let listToDisplay = currentPokemonList;
+  if (searchFilter !== '') {
+    listToDisplay = listToDisplay.filter(
+      (pokemon) => pokemon.name.toLowerCase().includes(searchFilter.toLowerCase())
+      || pokemon.id.toString().includes(searchFilter),
     );
   }
 
-  // CORREÇÃO (no-plusplus): Trocado 'i++' por 'i += 1'
-  for (let i = 0; i < fil.length; i += 1) {
-    const p = fil[i];
-    const fdp = document.createElement('div');
-    fdp.className = 'col-md-3';
+  for (let i = 0; i < listToDisplay.length; i += 1) {
+    const pokemon = listToDisplay[i];
+    const cardColumn = document.createElement('div');
+    cardColumn.className = 'col-md-3';
 
-    // CORREÇÃO: Usando template literals para legibilidade
-    let html = `
-      <div class="c" onclick="showDetails(${p.id})">
-        <img src="${p.sprites.front_default}" class="i" alt="${p.name}">
-        <h5 class="text-center">#${p.id} ${p.name
+    let cardHtml = `
+            <div class="pokemon-card" onclick="showDetails(${pokemon.id})">
+                <img src="${pokemon.sprites.front_default}" class="pokemon-image" alt="${pokemon.name}">
+                <h5 class="text-center">#${pokemon.id} ${pokemon.name
   .charAt(0)
-  .toUpperCase()}${p.name.slice(1)}</h5>
-        <div class="text-center">
-    `;
+  .toUpperCase()}${pokemon.name.slice(1)}</h5>
+                <div class="text-center">
+        `;
 
-    // CORREÇÃO (no-plusplus): Trocado 'j++' por 'j += 1'
-    for (let j = 0; j < p.types.length; j += 1) {
-      const typeName = p.types[j].type.name;
-      html += `<span class="badge type-${typeName}">${typeName}</span> `;
+    for (let j = 0; j < pokemon.types.length; j += 1) {
+      const typeName = pokemon.types[j].type.name;
+      cardHtml += `<span class="badge type-${typeName}">${typeName}</span> `;
     }
 
-    html += '</div></div>';
-    fdp.innerHTML = html;
-    grid.appendChild(fdp);
+    cardHtml += '</div></div>';
+    cardColumn.innerHTML = cardHtml;
+    gridContainer.appendChild(cardColumn);
   }
 
   document.getElementById('loading').style.display = 'none';
   document.getElementById('pokemonGrid').style.display = 'flex';
 
-  if (f1 !== '') {
-    document.getElementById(
-      'pageInfo',
-    ).textContent = `Mostrando ${fil.length} pokémons`;
+  const pageInfoElement = document.getElementById('pageInfo');
+  if (typeFilter !== '') {
+    pageInfoElement.textContent = `Mostrando ${listToDisplay.length} pokémons`;
   } else {
-    document.getElementById('pageInfo').textContent = `Página ${c}`;
+    pageInfoElement.textContent = `Página ${currentPage}`;
   }
 
-  document.getElementById('prevBtn').disabled = c === 1 || f1 !== '';
-  document.getElementById('nextBtn').disabled = f1 !== '';
+  // Desabilitar botões de navegação se estivermos filtrando por tipo
+  document.getElementById('prevBtn').disabled = currentPage === 1 || typeFilter !== '';
+  document.getElementById('nextBtn').disabled = typeFilter !== '';
 }
 
-async function l() {
+// Função: Carrega os Pokémons por página (padrão da API).
+async function loadPokemonPage() {
   document.getElementById('loading').style.display = 'flex';
   document.getElementById('pokemonGrid').style.display = 'none';
 
   try {
-    const off = (c - 1) * CONFIG.pageSize;
-    const ur = `${API}?limit=${CONFIG.pageSize}&offset=${off}`;
-    // CORREÇÃO (no-var): Trocado 'var' por 'const'
-    const response = await fetch(ur);
-    const dt = await response.json();
+    const offset = (currentPage - 1) * CONFIG.pageSize;
+    const apiUrl = `${POKEMON_API_URL}?limit=${CONFIG.pageSize}&offset=${offset}`;
+    const response = await fetch(apiUrl);
+    const data = await response.json();
 
-    const pro = [];
-    // CORREÇÃO (no-var / no-plusplus): Trocado 'var i' por 'let i' e 'i++' por 'i += 1'
-    for (let i = 0; i < dt.results.length; i += 1) {
-      pro.push(fetch(dt.results[i].url));
+    // Array para armazenar as promessas de detalhes de cada Pokémon
+    const detailPromises = [];
+    for (let i = 0; i < data.results.length; i += 1) {
+      detailPromises.push(fetch(data.results[i].url));
     }
 
-    // CORREÇÃO (no-var / no-shadow): Trocado 'var r' por 'const rAll'
-    const rAll = await Promise.all(pro);
-    a = [];
+    const responsesAll = await Promise.all(detailPromises);
+    pokemonCache = [];
 
-    // CORREÇÃO (no-await-in-loop):
-    // Otimizado para não usar 'await' dentro do loop.
-    // Usamos 'map' para criar um array de promessas de '.json()'
-    // e esperamos por todas elas de uma vez.
-    const pokemonPromises = rAll.map((res) => res.json());
-    a = await Promise.all(pokemonPromises);
+    // Mapeia as respostas para promessas de JSON e espera por todas de uma vez.
+    const pokemonJsonPromises = responsesAll.map((res) => res.json());
+    pokemonCache = await Promise.all(pokemonJsonPromises);
 
-    b = [...a];
-    UNIFOR();
+    currentPokemonList = [...pokemonCache];
+    renderPokemonGrid();
   } catch (error) {
-    // CORREÇÃO (no-console / no-alert): Removidos.
-    // O ideal seria mostrar o erro no DOM, não em um alert.
+    console.error('Erro ao carregar a página de Pokémons:', error);
   }
 }
 
-async function lbt() {
+// Função: Carrega Pokémons baseados no filtro de tipo.
+async function loadPokemonByType() {
   document.getElementById('loading').style.display = 'flex';
   document.getElementById('pokemonGrid').style.display = 'none';
 
   try {
-    const ur = `${API2}/${f1}`;
-    // CORREÇÃO (no-shadow): 'r' é const e local, está ok.
-    const response = await fetch(ur);
-    const dt = await response.json();
+    const apiUrl = `${TYPE_API_URL}/${typeFilter}`;
+    const response = await fetch(apiUrl);
+    const typeData = await response.json();
 
-    const pr = [];
-    const li = dt.pokemon.length > CONFIG.maxTypePokemons
+    const detailPromises = [];
+    const limit = typeData.pokemon.length > CONFIG.maxTypePokemons
       ? CONFIG.maxTypePokemons
-      : dt.pokemon.length;
-    // troca do numero 100 pelo nome da constante.
-    // CORREÇÃO (no-var / no-plusplus): Trocado 'var i' por 'let i' e 'i++' por 'i += 1'
-    for (let i = 0; i < li; i += 1) {
-      pr.push(fetch(dt.pokemon[i].pokemon.url));
+      : typeData.pokemon.length;
+
+    for (let i = 0; i < limit; i += 1) {
+      detailPromises.push(fetch(typeData.pokemon[i].pokemon.url));
     }
 
-    const rps = await Promise.all(pr);
-    a = [];
+    const responsesAll = await Promise.all(detailPromises);
+    pokemonCache = [];
 
-    // CORREÇÃO (no-await-in-loop): Otimizado.
-    const pokemonPromises = rps.map((p) => p.json());
-    a = await Promise.all(pokemonPromises);
+    // Mapeia as respostas para promessas de JSON e espera por todas.
+    const pokemonJsonPromises = responsesAll.map((res) => res.json());
+    pokemonCache = await Promise.all(pokemonJsonPromises);
 
-    b = [...a];
-    UNIFOR();
+    currentPokemonList = [...pokemonCache];
+    renderPokemonGrid();
   } catch (error) {
-    // CORREÇÃO (no-console / no-alert): Removidos.
+    console.error('Erro ao carregar Pokémons por tipo:', error);
   }
 }
 
+// Função: Inicializa a página, carregando esqueletos e o filtro de tipos.
 async function initializePage() {
   document.getElementById('loading').innerHTML = '';
-  // CORREÇÃO (no-var / no-plusplus): Trocado 'var i' por 'let i' e 'i++' por 'i += 1'
+
+  // Adiciona os esqueletos de carregamento.
   for (let i = 0; i < CONFIG.loadingSkeletons; i += 1) {
-    // substituicao do valor 20 pelo nome da constante.
     document.getElementById('loading').innerHTML
-      += '<div class="col-md-3"><div class="skeleton"></div></div>';
+            += '<div class="col-md-3"><div class="skeleton-card"></div></div>';
   }
 
   try {
-    const response = await fetch(API2);
-    const dt = await response.json();
-    const sel = document.getElementById('typeFilter');
-    // CORREÇÃO (no-var / no-plusplus): Trocado 'var i' por 'let i' e 'i++' por 'i += 1'
-    for (let i = 0; i < dt.results.length; i += 1) {
-      const opt = document.createElement('option');
-      opt.value = dt.results[i].name;
-      opt.textContent = dt.results[i].name.charAt(0).toUpperCase()
-        + dt.results[i].name.slice(1);
-      sel.appendChild(opt);
+    const response = await fetch(TYPE_API_URL);
+    const typeData = await response.json();
+    const typeSelectElement = document.getElementById('typeFilter');
+
+    // Popula o seletor de tipos.
+    for (let i = 0; i < typeData.results.length; i += 1) {
+      const option = document.createElement('option');
+      const typeName = typeData.results[i].name;
+      option.value = typeName;
+      option.textContent = typeName.charAt(0).toUpperCase()
+                + typeName.slice(1);
+      typeSelectElement.appendChild(option);
     }
   } catch (err) {
-    // CORREÇÃO (no-console): Removido.
+    console.error('Erro ao inicializar filtros de tipo:', err);
   }
 
-  l();
+  loadPokemonPage();
 }
 
-// CORREÇÃO (no-unused-vars): Esta função é chamada pelo HTML (onclick)
-// O ESLint não sabe disso, mas ela é usada.
-async function f() {
-  e = document.getElementById('s').value;
-  f1 = document.getElementById('typeFilter').value;
+// Função: Aplica os filtros de busca e tipo e recarrega os dados, se necessário.
+/* exported */
+async function applyFilters() {
+  searchFilter = document.getElementById('searchBar').value;
+  typeFilter = document.getElementById('typeFilter').value;
 
-  if (f1 !== '') {
-    await lbt();
+  if (typeFilter !== '') {
+    // Se houver filtro por tipo, carrega os pokémons do tipo.
+    await loadPokemonByType();
   } else {
-    UNIFOR();
+    // Se não houver filtro de tipo, apenas aplica o filtro de busca na lista atual.
+    renderPokemonGrid();
   }
 }
 
-// usando função para cumprir eslint
-f();
-
-// CORREÇÃO (no-unused-vars): Esta função é chamada pelo HTML (onclick)
+// Função: Reseta todos os filtros e volta para a primeira página.
+/* exported */
 function resetFilters() {
-  document.getElementById('s').value = '';
+  document.getElementById('searchBar').value = '';
   document.getElementById('typeFilter').value = '';
-  e = '';
-  f1 = '';
-  c = 1;
-  l();
+  searchFilter = '';
+  typeFilter = '';
+  currentPage = 1;
+  loadPokemonPage();
 }
 
-// usando função para cumprir eslint
-resetFilters();
-
-// CORREÇÃO (no-unused-vars): Esta função é chamada pelo HTML (onclick)
-function p1() {
-  if (c > 1) {
-    // CORREÇÃO (no-plusplus): Trocado 'c--' por 'c -= 1'
-    c -= 1;
-    if (f1 !== '') {
-      UNIFOR();
+// Função: Vai para a página anterior.
+/* exported */
+function goToPreviousPage() {
+  if (currentPage > 1) {
+    currentPage -= 1;
+    if (typeFilter !== '') {
+      renderPokemonGrid();
     } else {
-      l();
+      loadPokemonPage();
     }
   }
 }
 
-// CORREÇÃO (no-unused-vars): Esta função é chamada pelo HTML (onclick)
-function p2() {
-  // CORREÇÃO (no-plusplus): Trocado 'c++' por 'c += 1'
-  c += 1;
-  if (f1 !== '') {
-    UNIFOR();
+// Função: Vai para a próxima página.
+/* exported */
+function goToNextPage() {
+  currentPage += 1;
+  if (typeFilter !== '') {
+    renderPokemonGrid();
   } else {
-    l();
+    loadPokemonPage();
   }
 }
 
-// usando função para cumprir eslint
-p2();
-
-// usando função para cumprir eslint
-p1();
-
-// CORREÇÃO (no-unused-vars): Esta função é chamada pelo HTML (onclick)
-function x() {
+// Função: Alterna entre o tema claro e escuro.
+/* exported */
+function toggleTheme() {
   document.body.classList.toggle('dark');
 }
 
-// usando função para cumprir eslint
-x();
-
-// CORREÇÃO (camelcase / no-unused-vars):
-// 1. Renomeada de 'Minhe_nha' para 'showDetails' (camelCase).
-// 2. O HTML já chamava 'showDetails', então isso corrige o bug.
-/* exported showDetails */
+// Função: Exibe os detalhes de um Pokémon em um modal.
+/* exported */
 window.showDetails = async function showDetails(id) {
   try {
-    const xpto = await fetch(`${API}/${id}`);
-    const p = await xpto.json();
+    const pokemonResponse = await fetch(`${POKEMON_API_URL}/${id}`);
+    const pokemonData = await pokemonResponse.json();
 
-    const zyz = await fetch(p.species.url);
-    const m = await zyz.json();
+    const speciesResponse = await fetch(pokemonData.species.url);
+    const speciesData = await speciesResponse.json();
 
-    let desc = '';
-    // CORREÇÃO (no-var / no-plusplus): Trocado 'var i' por 'let i' e 'i++' por 'i += 1'
-    for (let i = 0; i < m.flavor_text_entries.length; i += 1) {
-      if (m.flavor_text_entries[i].language.name === 'en') {
-        desc = m.flavor_text_entries[i].flavor_text;
+    let description = '';
+    // Busca a descrição em inglês.
+    for (let i = 0; i < speciesData.flavor_text_entries.length; i += 1) {
+      if (speciesData.flavor_text_entries[i].language.name === 'en') {
+        description = speciesData.flavor_text_entries[i].flavor_text;
         break;
       }
     }
 
-    document.getElementById('modalTitle').textContent = `#${p.id} ${p.name
+    document.getElementById('modalTitle').textContent = `#${pokemonData.id} ${pokemonData.name
       .charAt(0)
       .toUpperCase()}
-    ${p.name.slice(1)}`;
+        ${pokemonData.name.slice(1)}`;
 
-    let ph = '<div class="row"><div class="col-md-6">';
-    ph += '<div class="sprite-container">';
-    ph += `<div><img src="${p.sprites.front_default}" alt="front"><p class="text-center">Normal</p></div>`;
-    ph += `<div><img src="${p.sprites.front_shiny}" alt="shiny"><p class="text-center">Shiny</p></div>`;
-    ph += '</div>';
+    let modalContentHtml = '<div class="row"><div class="col-md-6">';
+    modalContentHtml += '<div class="sprite-container">';
+    modalContentHtml += `<div><img src="${pokemonData.sprites.front_default}" alt="front"><p class="text-center">Normal</p></div>`;
+    modalContentHtml += `<div><img src="${pokemonData.sprites.front_shiny}" alt="shiny"><p class="text-center">Shiny</p></div>`;
+    modalContentHtml += '</div>';
 
-    ph += '<p><strong>Tipo:</strong> ';
-    // CORREÇÃO (no-var / no-plusplus): Trocado 'var i' por 'let i' e 'i++' por 'i += 1'
-    for (let i = 0; i < p.types.length; i += 1) {
-      ph += `<span class="badge type-${p.types[i].type.name}">${p.types[i].type.name}</span> `;
+    modalContentHtml += '<p><strong>Tipo:</strong> ';
+    for (let i = 0; i < pokemonData.types.length; i += 1) {
+      modalContentHtml += `<span class="badge type-${pokemonData.types[i].type.name}">${pokemonData.types[i].type.name}</span> `;
     }
-    ph += '</p>';
+    modalContentHtml += '</p>';
 
-    ph += `<p><strong>Altura:</strong> ${p.height / 10} m</p>`;
-    ph += `<p><strong>Peso:</strong> ${p.weight / 10} kg</p>`;
+    modalContentHtml += `<p><strong>Altura:</strong> ${pokemonData.height / 10} m</p>`;
+    modalContentHtml += `<p><strong>Peso:</strong> ${pokemonData.weight / 10} kg</p>`;
 
-    ph += '<p><strong>Habilidades:</strong> ';
-    // CORREÇÃO (no-var / no-plusplus): Trocado 'var i' por 'let i' e 'i++' por 'i += 1'
-    for (let i = 0; i < p.abilities.length; i += 1) {
-      ph += p.abilities[i].ability.name;
-      if (i < p.abilities.length - 1) ph += ', ';
+    modalContentHtml += '<p><strong>Habilidades:</strong> ';
+    for (let i = 0; i < pokemonData.abilities.length; i += 1) {
+      modalContentHtml += pokemonData.abilities[i].ability.name;
+      if (i < pokemonData.abilities.length - 1) modalContentHtml += ', ';
     }
-    ph += '</p>';
+    modalContentHtml += '</p>';
 
-    ph += '</div><div class="col-md-6">';
-    ph += '<p><strong>Descrição:</strong></p>';
-    ph += `<p>${desc.replace(/\f/g, ' ')}</p>`;
-    ph += '<h6>Estatísticas:</h6>';
-    // CORREÇÃO (no-var / no-plusplus): Trocado 'var i' por 'let i' e 'i++' por 'i += 1'
-    for (let i = 0; i < p.stats.length; i += 1) {
-      const stat = p.stats[i];
+    modalContentHtml += '</div><div class="col-md-6">';
+    modalContentHtml += '<p><strong>Descrição:</strong></p>';
+    modalContentHtml += `<p>${description.replace(/\f/g, ' ')}</p>`;
+    modalContentHtml += '<h6>Estatísticas:</h6>';
+
+    // Exibe as barras de estatísticas.
+    for (let i = 0; i < pokemonData.stats.length; i += 1) {
+      const stat = pokemonData.stats[i];
       const percentage = (stat.base_stat / CONFIG.maxStat) * 100;
-      // substituicao do 255 pelo nome da constante.
-      ph += `<div><small>${stat.stat.name}: ${stat.base_stat}</small>`;
-      ph += `<div class="stat-bar"><div class="stat-fill" style="width: ${percentage}%"></div></div></div>`;
+      modalContentHtml += `<div><small>${stat.stat.name}: ${stat.base_stat}</small>`;
+      modalContentHtml += `<div class="stat-bar"><div class="stat-fill" style="width: ${percentage}%"></div></div></div>`;
     }
 
-    ph += '</div></div>';
-    document.getElementById('modalBody').innerHTML = ph;
+    modalContentHtml += '</div></div>';
+    document.getElementById('modalBody').innerHTML = modalContentHtml;
 
-    const mod = new bootstrap.Modal(document.getElementById('m'));
-    mod.show();
+    const modalElement = new bootstrap.Modal(document.getElementById('pokemonModal'));
+    modalElement.show();
   } catch (error) {
-    // CORREÇÃO (no-console / no-alert): Removidos.
+    console.error('Erro ao exibir detalhes do Pokémon:', error);
   }
 };
 
-// usando função para cumprir eslint
-// showDetails(1);
-
-// CORREÇÃO (no-unused-vars): Removida a função 'mor' e a const 'gmord'
-// que não eram usadas em lugar nenhum.
-
-// CORREÇÃO (func-names): Trocada 'function ()' por uma arrow function '() =>'
 window.onload = () => {
   initializePage();
 };
+
+applyFilters();
+resetFilters();
+goToNextPage();
+goToPreviousPage();
+toggleTheme();
+toggleTheme();
