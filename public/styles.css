@@ -1,61 +1,65 @@
-/* Estilos com nomes ruins e código duplicado */
-
-/* Variável global mal nomeada */
+/* Variáveis para cores (Melhor legibilidade) */
 :root {
-    --c1: #ffffff;
-    --c2: #f8f9fa;
-    --c3: #000000;
-    --c4: #dee2e6;
+    --color-background-light: #ffffff; /* Antigo --c1 */
+    --color-background-page: #f8f9fa; /* Antigo --c2 */
+    --color-text: #000000; /* Antigo --c3 */
+    --color-border-card: #dee2e6; /* Antigo --c4 */
+    --color-stat-fill: #dc3545; /* Cor padrão para a barra de estatísticas (Danger/Red) */
 }
 
-/* Tema escuro com seletor confuso */
+/* Tema escuro */
 body.dark {
-    --c1: #212529;
-    --c2: #343a40;
-    --c3: #ffffff;
-    --c4: #495057;
+    --color-background-light: #212529;
+    --color-background-page: #343a40;
+    --color-text: #ffffff;
+    --color-border-card: #495057;
 }
 
 body {
-    background-color: var(--c2);
-    color: var(--c3);
+    background-color: var(--color-background-page);
+    color: var(--color-text);
     transition: all 0.3s;
+    /* Evita margin superior causada por nav padrão */
+    padding-top: 0;
 }
 
-/* Classe com nome não descritivo */
-.c {
-    background-color: var(--c1);
+/* Card do Pokémon (Antigo '.c') */
+.pokemon-card {
+    background-color: var(--color-background-light);
     border-radius: 10px;
     padding: 15px;
-    transition: transform 0.2s;
+    transition: transform 0.2s, box-shadow 0.2s;
     cursor: pointer;
-    border: 2px solid var(--c4);
+    border: 2px solid var(--color-border-card);
+    margin-bottom: 15px; /* Adicionado para evitar seletor complexo no final */
 }
 
-/* Hover duplicado */
-.c:hover {
+/* Efeito hover (Removida duplicação) */
+.pokemon-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
-.c:hover {
-    transform: translateY(-5px);
-}
-
-/* Classe com nome de uma letra */
-.i {
+/* Imagem do Pokémon (Antigo '.i') */
+.pokemon-image {
     width: 100%;
     height: 150px;
     object-fit: contain;
+    margin-bottom: 10px; /* Movido de um seletor específico aqui */
 }
 
-/* Números mágicos espalhados */
-.skeleton {
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+/* Skeleton de Carregamento (Antigo '.skeleton') */
+.skeleton-card {
+    background: linear-gradient(90deg, var(--color-border-card) 25%, #e0e0e0 50%, var(--color-border-card) 75%);
     background-size: 200% 100%;
     animation: loading 1.5s infinite;
     border-radius: 10px;
     height: 300px;
+}
+
+body.dark .skeleton-card {
+    background: linear-gradient(90deg, #495057 25%, #6c757d 50%, #495057 75%);
+    background-size: 200% 100%;
 }
 
 @keyframes loading {
@@ -63,23 +67,53 @@ body {
     100% { background-position: -200% 0; }
 }
 
-/* Seletor muito específico e desnecessário */
-body .container .row .col-md-3 .c .i {
-    margin-bottom: 10px;
-}
-
-/* Código duplicado para badges */
+/* Badges (Tipos) - Removida duplicação */
 .badge {
     margin: 2px;
     padding: 5px 10px;
     font-size: 12px;
+    display: inline-block;
+    color: white; /* Garante que o texto seja legível */
 }
 
-.badge {
-    margin: 2px;
+/* Modal Content */
+.modal-content {
+    background-color: var(--color-background-light);
+    color: var(--color-text);
 }
 
-/* Classes de tipo com cores hardcoded */
+.modal-header {
+    border-bottom: 1px solid var(--color-border-card);
+}
+
+/* Sprite Container para os detalhes */
+.sprite-container {
+    display: flex;
+    justify-content: space-around;
+    margin: 20px 0;
+}
+
+.sprite-container img {
+    width: 96px;
+    height: 96px;
+}
+
+/* Barras de Estatísticas */
+.stat-bar {
+    height: 20px;
+    background-color: var(--color-border-card);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.stat-fill {
+    height: 100%;
+    background-color: var(--color-stat-fill);
+    transition: width 0.3s;
+}
+
+/* Definições de cor para tipos (necessário manter, mas organizada) */
 .type-normal { background-color: #A8A878; }
 .type-fire { background-color: #F08030; }
 .type-water { background-color: #6890F0; }
@@ -99,56 +133,4 @@ body .container .row .col-md-3 .c .i {
 .type-steel { background-color: #B8B8D0; }
 .type-fairy { background-color: #EE99AC; }
 
-/* Classe nunca usada */
-.unused-class {
-    color: red;
-    font-size: 20px;
-}
-
-/* Mais duplicação */
-.modal-content {
-    background-color: var(--c1);
-    color: var(--c3);
-}
-
-.modal-header {
-    border-bottom: 1px solid var(--c4);
-}
-
-/* Seletor desnecessariamente complexo */
-body > div.container > div.row > div {
-    margin-bottom: 15px;
-}
-
-/* Sprite container com números mágicos */
-.sprite-container {
-    display: flex;
-    justify-content: space-around;
-    margin: 20px 0;
-}
-
-.sprite-container img {
-    width: 96px;
-    height: 96px;
-}
-
-/* Stats com código repetitivo */
-.stat-bar {
-    height: 20px;
-    background-color: #e9ecef;
-    border-radius: 10px;
-    overflow: hidden;
-    margin-bottom: 10px;
-}
-
-.stat-fill {
-    height: 100%;
-    background-color: #dc3545;
-    transition: width 0.3s;
-}
-
-/* Mais código morto */
-.another-unused {
-    display: none;
-}
-
+/* Removidas: .unused-class, .another-unused e seletores complexos/duplicados. */

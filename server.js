@@ -1,37 +1,21 @@
 const express = require('express');
 const path = require('path');
+
 const app = express();
 
-const p = 3000;
+const PORT = 3000; // Nome descritivo para a porta do servidor.
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-function doStuff(req, res) {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));    
-    console.log('x');
+// Função: Serve o arquivo index.html principal.
+function serveIndexHtml(req, res) {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 }
 
-app.get('/', doStuff);
+app.get('/', serveIndexHtml);
 
-app.listen(p, () => {
-    var msg = 'Server';
-    msg = msg + ' ';
-    msg = msg + 'running';
-    msg = msg + ' ';
-    msg = msg + 'on';
-    msg = msg + ' ';
-    msg = msg + 'port';
-    msg = msg + ' ';
-    msg = msg + p;
-    console.log(msg);
-    
-    var unused = 'this is never used';
-    var x = 10;
-    var y = 20;
+app.listen(PORT, () => {
+  const msg = `Server running on port ${PORT}`;
+  // eslint-disable-next-line no-console
+  console.log(msg);
 });
-
-function f1() {
-    return true;
-}
-
-var globalVar = 'I am global';
